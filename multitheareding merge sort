@@ -1,0 +1,106 @@
+import threading
+import random
+import time
+import matplotlib.pyplot as plt
+
+def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    mid = len(arr) // 2
+    left = arr[:mid]
+    right = arr[mid:]
+
+    left_thread = threading.Thread(target=merge_sort, args=(left,))
+    right_thread = threading.Thread(target=merge_sort, args=(right,))
+
+    left_thread.start()
+    right_thread.start()
+
+    left_thread.join()
+    right_thread.join()
+
+    merge(arr, left, right)
+
+def merge(arr, left, right):
+    i = j = k = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] < right[j]:
+            arr[k] = left[i]
+            i += 1
+        else:
+            arr[k] = right[j]
+            j += 1
+        k += 1
+
+    while i < len(left):
+        arr[k] = left[i]
+        i += 1
+        k += 1
+
+    while j < len(right):
+        arr[k] = right[j]
+        j += 1
+        k += 1
+
+def is_sorted(arr):
+    return all(arr[i] <= arr[i + 1] for i in range(len(arr) - 1))
+
+def correctness_proof():
+    arr = [random.randint(0, 100) for _ in range(100)]
+    merge_sort(arr)
+    return is_sorted(arr)
+
+def best_case_analysis():
+    arr = list(range(n))
+    start_time = time.time()
+    merge_sort(arr)
+    end_time = time.time()
+    return end_time - start_time
+
+
+def worst_case_analysis():
+    arr = list(range(n, 0, -1))
+    start_time = time.time()
+    merge_sort(arr)
+    end_time = time.time()
+    return end_time - start_time
+
+def average_case_analysis():
+    total_time = 0
+    for _ in range(trials):
+        arr = [random.randint(0, n) for _ in range(n)]
+        start_time = time.time()
+        merge_sort(arr)
+        end_time = time.time()
+        total_time += end_time - start_time
+    return total_time / trials
+
+def benchmark(size, runs):
+    times = []
+    for _ in range(runs):
+        arr = [random.randint(1, 1000) for _ in range(size)]
+        start_time = time.time()
+        merge_sort(arr)
+        end_time = time.time()
+        times.append(end_time - start_time)
+    return sum(times) / runs
+
+# Benchmark for different array sizes
+sizes = [10, 20, 30, 40, 50]
+average_times = []
+for size in sizes:
+    avg_time = benchmark(size, 5)
+    average_times.append(avg_time)
+    print(f"Average sorting time for array of size {size}: {avg_time} seconds")
+
+# Plotting the results
+plt.figure(figsize=(10, 6))
+plt.plot(sizes, average_times, marker='o')
+plt.title('Multithreaded Merge Sort Benchmark')
+plt.xlabel('Array Size')
+plt.ylabel('Average Time (seconds)')
+plt.grid(True)
+plt.xticks(sizes)
+plt.show()
